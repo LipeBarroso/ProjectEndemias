@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - Endemias</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <div class="logo">Endemias</div>
+
+    <h3>Informações da conta</h3>
+    <div class="input-box">
+      <span>📧</span>
+      <input type="email" placeholder="E-mail" id="email">
+    </div>
+    <div class="input-box">
+      <span>🔑</span>
+      <input type="password" placeholder="Senha" id="senha">
+      <span class="toggle" onclick="toggleSenha()">👁️</span>
+    </div>
+
+    <h3>Dados pessoais</h3>
+    <div class="input-box">
+      <span>👤</span>
+      <input type="text" placeholder="Nome" id="nome">
+    </div>
+    <div class="input-box">
+      <input type="text" placeholder="Sobrenome" id="sobrenome">
+    </div>
+    <div class="input-box">
+      <span>🆔</span>
+      <input type="text" placeholder="CPF" id="cpf">
+    </div>
+    <div class="input-box">
+      <span>📅</span>
+      <input type="date" placeholder="Data de nascimento" id="nascimento">
+    </div>
+    <div class="input-box">
+      <span>📞</span>
+      <input type="tel" placeholder="Telefone" id="telefone">
+    </div>
+
+    <h3>Sexo</h3>
+    <div class="radio-group">
+      <label><input type="radio" name="sexo" value="masculino"> Masculino</label>
+      <label><input type="radio" name="sexo" value="feminino"> Feminino</label>
+    </div>
+
+    <h3>Endereço</h3>
+    <div class="input-box"><input type="text" placeholder="* CEP" id="cep"></div>
+    <div class="input-box"><input type="text" placeholder="* Rua" id="rua"></div>
+    <div class="input-box"><input type="text" placeholder="* Número" id="numero"></div>
+    <div class="input-box"><input type="text" placeholder="Complemento (opcional)" id="complemento"></div>
+    <div class="input-box"><input type="text" placeholder="* Bairro" id="bairro"></div>
+    <div class="input-box"><input type="text" placeholder="* Cidade" id="cidade"></div>
+    <div class="input-box"><input type="text" placeholder="* Estado" id="estado"></div>
+
+    <button class="btn btn-login" onclick="cadastrarUsuario()">Cadastrar</button>
+    <button class="btn btn-register" onclick="voltarLogin()">Voltar</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+/* ---------- Estilo Geral ---------- */
+body {
+  background-color: #ffffff;
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* ---------- Container Principal ---------- */
+.container {
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 15px;
+  width: 400px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: 0.3s ease-in-out;
+}
+
+.container:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- Cabeçalho ---------- */
+.logo {
+  text-align: center;
+  color: #00897B;
+  font-size: 26px;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+  font-family: cursive;
+}
+
+/* ---------- Seção Dados ---------- */
+.dados-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.dados-header div {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.dados-header input {
+  width: 80px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.dados-header input:focus {
+  border-color: #004aad;
+  outline: none;
+}
+
+/* ---------- Dados Fixos ---------- */
+.dados-fixos {
+  background: #f8f8f8;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+}
+
+.dados-fixos label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.dados-fixos input {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+
+.dados-fixos input:focus {
+  border-color: #004aad;
+  background-color: #eef4ff;
+  outline: none;
+}
+
+/* ---------- Campos de Entrada ---------- */
+.input-box {
+  margin-bottom: 15px;
+}
+
+.input-box label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.input-box input,
+.input-box select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  transition: 0.3s;
+  font-size: 14px;
+}
+
+.input-box input:focus,
+.input-box select:focus {
+  border-color: #004aad;
+  background-color: #eef4ff;
+  outline: none;
+}
+
+/* ---------- Botões ---------- */
+.btn-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
+.btn {
+  width: 48%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-login {
+  background-color: #009688;
+  color: #fff;
+}
+
+.btn-login:hover {
+  background-color: #00796b;;
+}
+
+.btn-cancelar {
+  background-color: #E53935;
+  color: #ffffff;
+}
+
+.btn-cancelar:hover {
+  background-color: #770101;
+}
