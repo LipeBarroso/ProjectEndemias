@@ -10,10 +10,11 @@ $result = $conn->query($sql);
 $areas = [];
 
 if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $areas[] = $row;
-    }
+  while ($row = $result->fetch_assoc()) {
+    $areas[] = $row;
+  }
 }
+
 
 $conn->close();
 
@@ -21,6 +22,7 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <title>Áreas</title>
@@ -64,7 +66,8 @@ $conn->close();
       margin-top: 10px;
     }
 
-    th, td {
+    th,
+    td {
       border-bottom: 1px solid #ddd;
       text-align: left;
       padding: 10px;
@@ -143,13 +146,16 @@ $conn->close();
         width: 90%;
         padding: 20px;
       }
-      th, td {
+
+      th,
+      td {
         font-size: 13px;
         padding: 8px;
       }
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
@@ -170,7 +176,9 @@ $conn->close();
       </thead>
       <tbody>
         <?php if (empty($areas)): ?>
-          <tr><td colspan="8" style="text-align:center;">Nenhuma área encontrada.</td></tr>
+          <tr>
+            <td colspan="8" style="text-align:center;">Nenhuma área encontrada.</td>
+          </tr>
         <?php else: ?>
           <?php foreach ($areas as $a): ?>
             <tr>
@@ -183,7 +191,7 @@ $conn->close();
               <td><?php echo htmlspecialchars($a['qtd_gatos']); ?></td>
               <td>
                 <form action="rg.php?cod_area=<?php echo $a['cod_area']; ?>" method="post">
-                  <button  type="submit" class="btn btn-trabalhar" onclick="trabalhar('<?php echo addslashes($a['nome_area']); ?>')">Trabalhar</button>
+                  <button type="submit" class="btn btn-trabalhar" onclick="trabalhar('<?php echo addslashes($a['nome_area']); ?>')">Trabalhar</button>
                 </form>
               </td>
             </tr>
@@ -203,4 +211,5 @@ $conn->close();
   </script>
 
 </body>
+
 </html>
