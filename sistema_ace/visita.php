@@ -1,5 +1,5 @@
 <?php
-require "../init.php"; // conexão com o banco
+require "init.php"; // conexão com o banco
 
 // Verifica se veio ID pela URL
 $id_imovel = isset($_GET['id_imovel']) ? (int) $_GET['id_imovel'] : 0;

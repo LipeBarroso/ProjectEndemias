@@ -1,5 +1,5 @@
 <?php
-require "../init.php"; // conexão com o banco
+require "init.php"; // conexão com o banco
 
 // Buscar quarteirões existentes
 $sql_quarteiroes = "SELECT id_quarteirao, numero_quarteirao, nome_area 

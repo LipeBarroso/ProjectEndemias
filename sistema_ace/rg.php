@@ -1,5 +1,5 @@
 <?php
-require "../init.php"; // conexão com o banco (ajuste o caminho conforme seu projeto)
+require "init.php"; // conexão com o banco (ajuste o caminho conforme seu projeto)
 
 $cod_area = $_GET['cod_area'];
 
