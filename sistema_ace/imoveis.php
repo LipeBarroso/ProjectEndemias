@@ -1,29 +1,33 @@
 <?php
 require "init.php"; // conexão com o banco (ajuste o caminho conforme seu projeto)
 
-$id_quarteirao = $_GET['id_quarteirao'];
+$id_quarteirao = isset($_GET['id_quarteirao']) ? (int)$_GET['id_quarteirao'] : 0;
 
 //Consulta número do Quarteirão
 $sql_1 = "
     SELECT
         numero_quarteirao
     FROM registro_geografico
-    WHERE id_quarteirao = $id_quarteirao
+    WHERE id_quarteirao = ?
 ";
-
-$resultado = $conn->query($sql_1);
+$stmt_1 = $conn->prepare($sql_1);
+$stmt_1->bind_param("i", $id_quarteirao);
+$stmt_1->execute();
+$resultado = $stmt_1->get_result();
 $numero_quarteirao = $resultado->fetch_assoc();
-$numero_quarteirao = $numero_quarteirao['numero_quarteirao'];
-
 // Consulta principal
 $sql = "
     SELECT 
         *
     FROM imovel
-    WHERE id_quarteirao = $id_quarteirao
+    WHERE id_quarteirao = ?
     ORDER BY nome_rua ASC
 ";
 
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $id_quarteirao);
+$stmt->execute();
+$result = $stmt->get_result();
 
 $result = $conn->query($sql);
 $imoveis = [];
@@ -189,12 +193,10 @@ $conn->close();
               <td><?php echo htmlspecialchars($i['nome_rua']); ?></td>
               <td><?php echo htmlspecialchars($i['numer_imovel']); ?></td>
               <td><?php echo htmlspecialchars($i['tipo_imovel']); ?></td>
-              <td><?php echo htmlspecialchars($i['qtd_habitantes']); ?></td>
-              <td><?php echo htmlspecialchars($i['qtd_caes']); ?></td>
               <td><?php echo htmlspecialchars($i['qtd_gatos']); ?></td>
               <td>
-                <form action="visita.php?id_imovel=<?php echo $i['id_imovel']?>" method="post">
-                    <button class="btn btn-trabalhar" onclick="trabalhar(<?php echo (int)$i['id_imovel']; ?>)">Trabalhar</button>
+                <a href="visita.php?id_imovel=<?php echo htmlspecialchars((int)$i['id_imovel']); ?>" class="btn btn-trabalhar" style="display:block;">Trabalhar</a>
+              </td> <button class="btn btn-trabalhar" onclick="trabalhar(<?php echo (int)$i['id_imovel']; ?>)">Trabalhar</button>
                 </form>
               </td>
             </tr>

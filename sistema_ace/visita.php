@@ -4,27 +4,38 @@ require "init.php"; // conexão com o banco
 // Verifica se veio ID pela URL
 $id_imovel = isset($_GET['id_imovel']) ? (int) $_GET['id_imovel'] : 0;
 
+if ($id_imovel == 0) {
+    echo '<script>alert("Erro: ID do imóvel não informado."); window.location.href = "index.php";</script>';
+    exit;
+}
+
 // Consulta dados do imóvel
 $sql_1 = "SELECT * 
           FROM imovel 
-          WHERE id_imovel = $id_imovel";
+          WHERE id_imovel = ?";
 
-$dados_imovel = $conn->query($sql_1);
-$dados_imovel = $dados_imovel->fetch_assoc();
+$stmt_1 = $conn->prepare($sql_1);
+$stmt_1->bind_param("i", $id_imovel);
+$stmt_1->execute();
+$resultado = $stmt_1->get_result();
 
+if ($resultado->num_rows == 0) {
+    echo '<script>alert("Erro: Imóvel não encontrado."); window.location.href = "index.php";</script>';
+    exit;
+}
 
+$dados_imovel = $resultado->fetch_assoc();
+$stmt_1->close();
 
-// criando a visita para poder alterá-la ou salvar
-$tipo = $dados_imovel['tipo'];
+// Criando a visita para poder alterá-la ou salvar
+$tipo = isset($dados_imovel['tipo_imovel']) ? htmlspecialchars($dados_imovel['tipo_imovel']) : '';
 
-$sql_2 = "INSERT 
-          INTO visita(id_imovel, tipo) 
-          values('$id_imovel','$tipo')";
-
-$conn->query($sql_2);
-
-$sql_3 = "SELECT id_visita
-          FROM visita";
+$sql_2 = "INSERT INTO visita(id_imovel, tipo) VALUES(?, ?)";
+$stmt_insert = $conn->prepare($sql_2);
+$stmt_insert->bind_param("is", $id_imovel, $tipo);
+$stmt_insert->execute();
+$id_visita = $conn->insert_id;
+$stmt_insert->close();
 
 
 
@@ -251,64 +262,39 @@ $conn->close();
 <body>
 
   <div class="form-container">
-    <h2>*Nome do Bairro</h2>
+    <h2>🏠 Registrar Visita Domiciliar</h2>
 
-    <form method="post" action="deposito.php?id_visita=<?php echo $id_visita ?>">
-      <label for="id"></label>
-      <input value="<?php echo $id_imovel ?>" type="hidden" id="id" name="id">
-
-      <label for="cod">Código</label>
-      <input value="" type="text" id="cod" name="cod" placeholder="Ex: 331" required>
-
-      <label for="zona">Zona</label>
-      <input type="text" id="zona" name="zona" placeholder="Ex: 13" required>
-
-      <label for="quarteirao">Quarteirão</label>
-      <input value="" type="text" id="quarteirao" name="quarteirao" placeholder="Ex: 33" required>
-
+    <form method="post" action="deposito.php?id_visita=<?php echo htmlspecialchars($id_visita); ?>">
       <label for="logradouro">Logradouro</label>
-      <input value="<?php echo $dados_imovel['nome_rua'] ?>" type="text" id="logradouro" name="logradouro" placeholder="Ex: Rua das Palmeiras" required>
+      <input value="<?php echo htmlspecialchars($dados_imovel['nome_rua'] ?? ''); ?>" type="text" id="logradouro" name="logradouro" placeholder="Ex: Rua das Palmeiras" readonly>
 
       <label for="numero">Número</label>
-      <input value="<?php echo $dados_imovel['numer_imovel'] ?>" type="text" id="numero" name="numero" placeholder="Ex: 25" required>
+      <input value="<?php echo htmlspecialchars($dados_imovel['numer_imovel'] ?? ''); ?>" type="text" id="numero" name="numero" placeholder="Ex: 25" readonly>
 
-      <label for="tipo">Tipo</label>
-      <input value="<?php echo $dados_imovel['tipo_imovel'] ?>" type="text" id="tipo" name="tipo" placeholder="Ex: Residencial" required>
+      <label for="tipo">Tipo de Imóvel</label>
+      <input value="<?php echo htmlspecialchars($dados_imovel['tipo_imovel'] ?? ''); ?>" type="text" id="tipo" name="tipo" placeholder="Ex: Residencial" readonly>
 
       <label for="h">Habitantes</label>
-      <input value="<?php echo $dados_imovel['qtd_habitantes'] ?>" type="number" id="h" name="h" placeholder="Ex: Sim ou Não">
+      <input value="<?php echo htmlspecialchars($dados_imovel['qtd_habitantes'] ?? ''); ?>" type="number" id="h" name="h" placeholder="Ex: 5" readonly>
 
       <label for="c">Cães</label>
-      <input value="<?php echo $dados_imovel['qtd_caes'] ?>" type="number" id="c" name="c" placeholder="Quantidade">
+      <input value="<?php echo htmlspecialchars($dados_imovel['qtd_caes'] ?? ''); ?>" type="number" id="c" name="c" placeholder="Quantidade" readonly>
 
       <label for="g">Gatos</label>
-      <input value="<?php echo $dados_imovel['qtd_gatos'] ?>" type="number" id="g" name="g" placeholder="Quantidade">
+      <input value="<?php echo htmlspecialchars($dados_imovel['qtd_gatos'] ?? ''); ?>" type="number" id="g" name="g" placeholder="Quantidade" readonly>
 
-      <label for="visita">Visita</label>
+      <label for="visita">Tipo de Visita</label>
       <select id="visita" name="visita" required>
-        <option value="">Selecione</option>
+        <option value="">Selecione...</option>
         <option value="Normal">Normal</option>
         <option value="Repasse">Repasse</option>
       </select>
 
-      <label for="hora">Hora</label>
+      <label for="hora">Hora da Visita</label>
       <input type="time" id="hora" name="hora" required>
 
-      <form action="deposito.php?id_visita=<?php echo $id_visita ?>" method="post">
-        <button type="submit" class="btn btn-salvar">Depósitos</button>
-      </form>
-
-      <div class="campo">
-        <label for="a1">A1</label>
-        <input type="number" id="a1" name="a1" placeholder="Digite A1">
-        <label for="focos_a1"></label>
-        <input type="number" id="focos_a1" name="a1" placeholder="Quantos possuem foco">
-        <label for="larvicida">Larvicida</label>
-        <input type="number" id="larvicida" name="larvicida" placeholder="Qtd Larvicida" min="0" step="0.5">
-      </div>
-
-      <button type="submit" class="btn btn-salvar">Salvar</button>
-      <button type="button" onclick="voltar()" class="btn btn-cancelar">Cancelar</button>
+      <button type="submit" class="btn btn-salvar">Próximo: Registrar Depósitos →</button>
+      <a href="javascript:window.history.back()" class="btn btn-cancelar">← Voltar</a>
     </form>
   </div>
 

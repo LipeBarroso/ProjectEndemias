@@ -200,7 +200,7 @@ $conn->close();
       <input type="number" name="qtd_gatos" id="qtd_gatos" min="0">
 
       <button type="submit" class="btn btn-enviar">Cadastrar</button>
-      <button href="index.php" class="btn btn-voltar">Voltar</button>
+      <a href="index.php" class="btn btn-voltar">Voltar</a>
     </form>
   </div>
 

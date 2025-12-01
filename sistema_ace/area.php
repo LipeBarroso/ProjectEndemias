@@ -190,9 +190,7 @@ $conn->close();
               <td><?php echo htmlspecialchars($a['qtd_caes']); ?></td>
               <td><?php echo htmlspecialchars($a['qtd_gatos']); ?></td>
               <td>
-                <form action="rg.php?cod_area=<?php echo $a['cod_area']; ?>" method="post">
-                  <button type="submit" class="btn btn-trabalhar" onclick="trabalhar('<?php echo addslashes($a['nome_area']); ?>')">Trabalhar</button>
-                </form>
+                <a href="rg.php?cod_area=<?php echo htmlspecialchars($a['cod_area']); ?>" class="btn btn-trabalhar" style="display:block;">Trabalhar</a>
               </td>
             </tr>
           <?php endforeach; ?>

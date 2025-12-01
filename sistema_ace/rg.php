@@ -1,7 +1,7 @@
 <?php
 require "init.php"; // conexão com o banco (ajuste o caminho conforme seu projeto)
 
-$cod_area = $_GET['cod_area'];
+$cod_area = isset($_GET['cod_area']) ? (int)$_GET['cod_area'] : 0;
 
 
 // Consulta principal
@@ -22,11 +22,14 @@ $sql = "
         qtd_caes,
         qtd_gatos
     FROM registro_geografico
-    WHERE cod_area = $cod_area
+    WHERE cod_area = ?
     ORDER BY numero_quarteirao ASC
 ";
 
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $cod_area);
+$stmt->execute();
+$result = $stmt->get_result();
 $quarteiroes = [];
 
 if ($result && $result->num_rows > 0) {
@@ -189,11 +192,9 @@ $conn->close();
             <td><?php echo htmlspecialchars($q['qtd_imoveis']); ?></td>
             <td><?php echo htmlspecialchars($q['qtd_residencia']); ?></td>
             <td><?php echo htmlspecialchars($q['qtd_comercio']); ?></td>
-            <td><?php echo htmlspecialchars($q['qtd_habitantes']); ?></td>
-            <td><?php echo htmlspecialchars($q['qtd_caes']); ?></td>
-            <td><?php echo htmlspecialchars($q['qtd_gatos']); ?></td>
             <td>
-              <form action="imoveis.php?id_quarteirao=<?php echo $q['id_quarteirao'] ?> " method="post">
+              <a href="imoveis.php?id_quarteirao=<?php echo htmlspecialchars((int)$q['id_quarteirao']); ?>" class="btn btn-trabalhar" style="display:block;">Trabalhar</a>
+            </td>rm action="imoveis.php?id_quarteirao=<?php echo $q['id_quarteirao'] ?> " method="post">
                 <button type="submit" class="btn btn-trabalhar" onclick="trabalhar(<?php echo (int)$q['id_quarteirao']; ?>)">Trabalhar</button>
               </form>
             </td>
