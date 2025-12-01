@@ -1,8 +1,14 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require "init.php"; // conexão com o banco
 
 // Verifica se veio ID pela URL
 $id_imovel = isset($_GET['id_imovel']) ? (int) $_GET['id_imovel'] : 0;
+
 
 // Consulta dados do imóvel
 $sql_1 = "SELECT * 
@@ -11,56 +17,56 @@ $sql_1 = "SELECT *
 
 $dados_imovel = $conn->query($sql_1);
 $dados_imovel = $dados_imovel->fetch_assoc();
+$id_quarteirao = $dados_imovel['id_quarteirao'];
+
+//consulta dados do quarteirao
+
+$sql_registro_geografico = "SELECT 
+                                id_quarteirao,
+                                numero_quarteirao,
+                                cod_area,
+                                nome_area,
+                                cod_zona
+                            FROM registro_geografico
+                            WHERE id_quarteirao = $id_quarteirao
+                            LIMIT 1";
+
+$dados_quarteirao = $conn->query($sql_registro_geografico);
+$dados_quarteirao = $dados_quarteirao->fetch_assoc();
 
 
+// verificando se existe visita em andamento
+if (!isset($_SESSION['visita_id'])) {
 
-// criando a visita para poder alterá-la ou salvar
-$tipo = $dados_imovel['tipo'];
+  //verifica se a visita existe para esse imóvel e está em estado aberto, ou seja foi criada mas não finalizada estado = 1 (visita aberta), estado = 0 (visita finalizada)
 
-$sql_2 = "INSERT 
-          INTO visita(id_imovel, tipo) 
-          values('$id_imovel','$tipo')";
+  $sql_verifica = "SELECT id_visita
+                   FROM visita
+                   WHERE id_imovel = $id_imovel AND estado = 1 
+                   LIMIT 1";
 
-$conn->query($sql_2);
+  $resultado_verifica = $conn->query($sql_verifica);
 
-$sql_3 = "SELECT id_visita
-          FROM visita";
+  if ($resultado_verifica->num_rows > 0) {
+    //existe a visita e vamos utilizá-la
+    $linha = $resultado_verifica->fetch_assoc();
 
+    $_SESSION['visita_id'] = $linha['id_visita'];
+  } else { // A visita não existe então vamos criala
 
+    $sql_cria_visita = "INSERT 
+                          INTO visita(id_imovel, estado) 
+                          values('$id_imovel', 1)";
+    $conn->query($sql_cria_visita);
 
-
-// Se o formulário for enviado
-/*
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id_imovel = (int) $_POST['id'];
-    $nome_rua = $_POST['logradouro'] ?? '';
-    $numer_imovel = $_POST['numero'] ?? '';
-    $tipo = $_POST['tipo'] ?? '';
-    $qtd_habitantes = (int) ($_POST['h'] ?? 0);
-    $qtd_caes = (int) ($_POST['c'] ?? 0);
-    $qtd_gatos = (int) ($_POST['g'] ?? 0);
-
-    $sql = "UPDATE imovel 
-            SET nome_rua = ?, 
-                numero_imovel = ?, 
-                tipo_imovel = ?, 
-                qtd_habitantes = ?, 
-                qtd_caes = ?, 
-                qtd_gatos = ? 
-            WHERE id_imovel = ?";
-    
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssiiii", $nome_rua, $numero_imovel, $tipo, $qtd_habitantes, $qtd_caes, $qtd_gatos, $id_imovel);
-    
-    if ($stmt->execute()) {
-        echo "<p style='color:green;'>✅ Dados atualizados com sucesso!</p>";
-    } else {
-        echo "<p style='color:red;'>❌ Erro ao atualizar: " . $conn->error . "</p>";
-    }
-
-    $stmt->close();
+    $_SESSION['visita_id'] = $conn->insert_id;
+  }
 }
-*/
+
+
+
+$id_visita = $_SESSION['visita_id'];
+
 $conn->close();
 ?>
 
@@ -72,7 +78,6 @@ $conn->close();
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Visita Domiciliar</title>
-  <link rel="stylesheet" href="style.css" />
   <style>
     /* === Centralização e layout geral === */
     body {
@@ -173,6 +178,10 @@ $conn->close();
       background: #1565c0;
     }
 
+    #depositos {
+      display: none;
+    }
+
     /* === Responsividade === */
     @media (max-width: 768px) {
       .form-container {
@@ -251,32 +260,32 @@ $conn->close();
 <body>
 
   <div class="form-container">
-    <h2>*Nome do Bairro</h2>
+    <h2><?php echo $dados_quarteirao['nome_area'] . " - " . $dados_quarteirao['numero_quarteirao'] ?></h2>
 
     <form method="post" action="deposito.php?id_visita=<?php echo $id_visita ?>">
       <label for="id"></label>
       <input value="<?php echo $id_imovel ?>" type="hidden" id="id" name="id">
 
+      <label for="id_quarteirao"></label>
+      <input value="<?php echo $dados_quarteirao['id_quarteirao'] ?>" type="hidden" id="id_quarteirao" name="id_quarteirao">
+
       <label for="cod">Código</label>
-      <input value="" type="text" id="cod" name="cod" placeholder="Ex: 331" required>
+      <input value="<?php echo $dados_quarteirao['cod_area'] ?>" type="text" id="cod" name="cod" required>
 
       <label for="zona">Zona</label>
-      <input type="text" id="zona" name="zona" placeholder="Ex: 13" required>
-
-      <label for="quarteirao">Quarteirão</label>
-      <input value="" type="text" id="quarteirao" name="quarteirao" placeholder="Ex: 33" required>
+      <input value="<?php echo $dados_quarteirao['cod_zona'] ?>" type="text" id="zona" name="zona" required>
 
       <label for="logradouro">Logradouro</label>
       <input value="<?php echo $dados_imovel['nome_rua'] ?>" type="text" id="logradouro" name="logradouro" placeholder="Ex: Rua das Palmeiras" required>
 
       <label for="numero">Número</label>
-      <input value="<?php echo $dados_imovel['numer_imovel'] ?>" type="text" id="numero" name="numero" placeholder="Ex: 25" required>
+      <input value="<?php echo $dados_imovel['numero_imovel'] ?>" type="text" id="numero" name="numero" required>
 
       <label for="tipo">Tipo</label>
-      <input value="<?php echo $dados_imovel['tipo_imovel'] ?>" type="text" id="tipo" name="tipo" placeholder="Ex: Residencial" required>
+      <input value="<?php echo $dados_imovel['tipo_imovel'] ?>" type="text" id="tipo" name="tipo" required>
 
       <label for="h">Habitantes</label>
-      <input value="<?php echo $dados_imovel['qtd_habitantes'] ?>" type="number" id="h" name="h" placeholder="Ex: Sim ou Não">
+      <input value="<?php echo $dados_imovel['qtd_habitantes'] ?>" type="number" id="h" name="h">
 
       <label for="c">Cães</label>
       <input value="<?php echo $dados_imovel['qtd_caes'] ?>" type="number" id="c" name="c" placeholder="Quantidade">
@@ -291,30 +300,42 @@ $conn->close();
         <option value="Repasse">Repasse</option>
       </select>
 
+      <label for="data">Data</label>
+      <input type="date" id="data" name="data" required>
+
       <label for="hora">Hora</label>
       <input type="time" id="hora" name="hora" required>
 
-      <form action="deposito.php?id_visita=<?php echo $id_visita ?>" method="post">
-        <button type="submit" class="btn btn-salvar">Depósitos</button>
-      </form>
+      <button type="button" onclick="mostrar()" class="btn btn-cancelar">Depósitos</button>
 
-      <div class="campo">
+      <div id="depositos">
         <label for="a1">A1</label>
         <input type="number" id="a1" name="a1" placeholder="Digite A1">
         <label for="focos_a1"></label>
-        <input type="number" id="focos_a1" name="a1" placeholder="Quantos possuem foco">
+        <input type="number" id="focos_a1" name="focos_a1" placeholder="Quantos possuem foco">
         <label for="larvicida">Larvicida</label>
         <input type="number" id="larvicida" name="larvicida" placeholder="Qtd Larvicida" min="0" step="0.5">
       </div>
 
       <button type="submit" class="btn btn-salvar">Salvar</button>
-      <button type="button" onclick="voltar()" class="btn btn-cancelar">Cancelar</button>
+      <button type="submit" onclick="voltar()" class="btn btn-cancelar">Cancelar</button>
     </form>
   </div>
 
   <script>
     function voltar() {
       window.history.back();
+    }
+
+    function mostrar() {
+      let div = document.getElementById("depositos");
+
+      if (div.style.display === "none") {
+        div.style.display = "block";
+      } else {
+        div.style.display = "none";
+      }
+
     }
   </script>
 
