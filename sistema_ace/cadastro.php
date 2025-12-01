@@ -1,43 +1,72 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require "init.php"; // conexão com o banco
+
+$id_quarteirao = $_GET['id_quarteirao'];
+echo $id_quarteirao;
 
 // Buscar quarteirões existentes
 $sql_quarteiroes = "SELECT id_quarteirao, numero_quarteirao, nome_area 
                     FROM registro_geografico 
-                    ORDER BY numero_quarteirao ASC";
+                    WHERE id_quarteirao = $id_quarteirao
+                    LIMIT 1";
 $result_quarteiroes = $conn->query($sql_quarteiroes);
+$quarteirao = $result_quarteiroes->fetch_assoc();
 
 // Se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id_quarteirao = intval($_POST['id_quarteirao']);
-    $nome_rua = trim($_POST['nome_rua']);
-    $numer_imovel = trim($_POST['numer_imovel']);
-    $tipo_imovel = trim($_POST['tipo_imovel']);
-    $qtd_habitantes = $_POST['qtd_habitantes'] !== '' ? intval($_POST['qtd_habitantes']) : null;
-    $qtd_caes = $_POST['qtd_caes'] !== '' ? intval($_POST['qtd_caes']) : null;
-    $qtd_gatos = $_POST['qtd_gatos'] !== '' ? intval($_POST['qtd_gatos']) : null;
 
-    $sql = "INSERT INTO imovel (id_quarteirao, nome_rua, numer_imovel, tipo_imovel, qtd_habitantes, qtd_caes, qtd_gatos)
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
+  // Verificar se os campos existem
 
-    // 'i' = inteiro, 's' = string
-    $stmt->bind_param("isssiii", $id_quarteirao, $nome_rua, $numer_imovel, $tipo_imovel, $qtd_habitantes, $qtd_caes, $qtd_gatos);
 
-    if ($stmt->execute()) {
-        $mensagem = "✅ Imóvel cadastrado com sucesso!";
-    } else {
-        $mensagem = "❌ Erro ao cadastrar: " . $stmt->error;
-    }
+  $id_quarteirao = intval($_POST['id_quarteirao']);
+  $nome_rua = ($_POST['nome_rua']);
+  $numero_imovel = ($_POST['numero_imovel']);
+  $tipo_imovel = ($_POST['tipo_imovel']);
 
-    $stmt->close();
+  $qtd_habitantes = $_POST['qtd_habitantes'] !== '' ? intval($_POST['qtd_habitantes']) : null;
+  $qtd_caes       = $_POST['qtd_caes'] !== '' ? intval($_POST['qtd_caes']) : null;
+  $qtd_gatos      = $_POST['qtd_gatos'] !== '' ? intval($_POST['qtd_gatos']) : null;
+
+  $sql = "INSERT INTO imovel 
+          (id_quarteirao, nome_rua, numero_imovel, tipo_imovel, qtd_habitantes, qtd_caes, qtd_gatos)
+          VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param(
+    "isssiii",
+    $id_quarteirao,
+    $nome_rua,
+    $numero_imovel,
+    $tipo_imovel,
+    $qtd_habitantes,
+    $qtd_caes,
+    $qtd_gatos
+  );
+
+  if ($stmt->execute()) {
+    $mensagem = "✅ Imóvel cadastrado com sucesso!";
+  } else {
+    $mensagem = "❌ Erro ao cadastrar: " . $stmt->error;
+  }
+
+  $stmt->close();
+
+  header("Location: imoveis.php?id_quarteirao=$id_quarteirao&ok=1");
+  exit;
 }
 
-$conn->close();
+
+
+
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <title>Cadastrar Imóvel</title>
@@ -89,7 +118,8 @@ $conn->close();
       margin-top: 12px;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
@@ -101,7 +131,8 @@ $conn->close();
       transition: border 0.2s;
     }
 
-    input:focus, select:focus {
+    input:focus,
+    select:focus {
       border-color: #009688;
       background: #fff;
     }
@@ -152,6 +183,7 @@ $conn->close();
     }
   </style>
 </head>
+
 <body>
 
   <div class="form-container">
@@ -162,26 +194,20 @@ $conn->close();
     <?php endif; ?>
 
     <form method="POST" action="">
+
       <label for="id_quarteirao">Quarteirão</label>
-      <select name="id_quarteirao" id="id_quarteirao" required>
-        <option value="">Selecione...</option>
-        <?php if ($result_quarteiroes && $result_quarteiroes->num_rows > 0): ?>
-          <?php while ($q = $result_quarteiroes->fetch_assoc()): ?>
-            <option value="<?php echo $q['id_quarteirao']; ?>">
-              <?php echo $q['numero_quarteirao'] . " - " . $q['nome_area']; ?>
-            </option>
-          <?php endwhile; ?>
-        <?php endif; ?>
-      </select>
+      <input type="hidden" name="id_quarteirao" value="<?php echo $quarteirao['id_quarteirao'] ?>">
+      <input type="text" readonly id="id_quarteirao"
+        value="<?php echo $quarteirao['nome_area'] . ' - ' . $quarteirao['numero_quarteirao']; ?>">
 
       <label for="nome_rua">Nome da Rua</label>
-      <input type="text" name="nome_rua" id="nome_rua" required>
+      <input type="text" name="nome_rua" id="nome_rua">
 
-      <label for="numer_imovel">Número do Imóvel</label>
-      <input type="text" name="numer_imovel" id="numer_imovel" required>
+      <label for="numero_imovel">Número do Imóvel</label>
+      <input type="text" name="numero_imovel" id="numero_imovel">
 
       <label for="tipo_imovel">Tipo do Imóvel</label>
-      <select name="tipo_imovel" id="tipo_imovel" required>
+      <select name="tipo_imovel" id="tipo_imovel">
         <option value="">Selecione...</option>
         <option value="Residencial">Residencial</option>
         <option value="Comercial">Comercial</option>
@@ -200,9 +226,16 @@ $conn->close();
       <input type="number" name="qtd_gatos" id="qtd_gatos" min="0">
 
       <button type="submit" class="btn btn-enviar">Cadastrar</button>
-      <button href="index.php" class="btn btn-voltar">Voltar</button>
+
     </form>
+
+
+    <a href="imoveis.php?id_quarteirao=<?php echo $id_quarteirao ?>" class="btn btn-voltar">
+      Cancelar
+    </a>
+
   </div>
 
 </body>
+
 </html>
