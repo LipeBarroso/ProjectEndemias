@@ -47,6 +47,8 @@ $conn->close();
 <title>Registro Geográfico</title>
 <link rel="stylesheet" href="style.css">
 <style>
+  /* Global box-sizing para melhor controle de largura */
+  *, *::before, *::after { box-sizing: border-box; }
   /* Centralização total */
   body {
     display: flex;
@@ -146,8 +148,8 @@ $conn->close();
 
   @media (max-width: 700px) {
     .container {
-      width: 90%;
-      padding: 20px;
+      width: 96%;
+      padding: 14px;
     }
     th, td {
       font-size: 13px;
@@ -159,6 +161,9 @@ $conn->close();
 <body>
 
   <div class="container">
+    <div style="font-size:12px; color:#666; margin-bottom:16px;">
+      <a href="index.php" style="color:#1976d2; text-decoration:none;">Home</a> &gt; <a href="area.php" style="color:#1976d2; text-decoration:none;">Áreas</a> &gt; <span style="color:#333; font-weight:600;">Quarteirões</span>
+    </div>
     <h2>Registro Geográfico</h2>
 
     <div class="info-header">
@@ -203,7 +208,7 @@ $conn->close();
       </tbody>
     </table>
 
-    <button class="btn btn-voltar" onclick="window.history.back()">Voltar</button>
+    <button class="btn btn-voltar" onclick="window.location.href='area.php';">Voltar</button>
   </div>
 
 <script>

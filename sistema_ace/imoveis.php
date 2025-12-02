@@ -48,6 +48,8 @@ $conn->close();
   <title>Imóveis Cadastrados</title>
   <link rel="stylesheet" href="style.css">
   <style>
+    /* Global box-sizing para evitar overflow inesperado */
+    *, *::before, *::after { box-sizing: border-box; }
     body {
       display: flex;
       justify-content: center;
@@ -62,7 +64,7 @@ $conn->close();
       background: #fff;
       width: 95%;
       max-width: 950px;
-      padding: 30px;
+      padding: 22px;
       border-radius: 16px;
       box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -149,8 +151,8 @@ $conn->close();
 
     @media (max-width: 700px) {
       .container {
-        width: 90%;
-        padding: 20px;
+        width: 96%;
+        padding: 14px;
       }
 
       th,
@@ -170,6 +172,9 @@ $conn->close();
 <body>
 
   <div class="container">
+    <div style="font-size:12px; color:#666; margin-bottom:16px;">
+      <a href="index.php" style="color:#1976d2; text-decoration:none;">Home</a> &gt; <a href="area.php" style="color:#1976d2; text-decoration:none;">Áreas</a> &gt; <a href="rg.php?cod_area=<?php echo urlencode($_GET['cod_area'] ?? ''); ?>" style="color:#1976d2; text-decoration:none;">Quarteirões</a> &gt; <span style="color:#333; font-weight:600;">Imóveis</span>
+    </div>
     <h2>Imóveis Cadastrados</h2>
 
     <table>
@@ -195,14 +200,15 @@ $conn->close();
             <tr>
               <td><?php echo $numero_quarteirao; ?></td>
               <td><?php echo htmlspecialchars($i['nome_rua']); ?></td>
-              <td><?php echo htmlspecialchars($i['numer_imovel']); ?></td>
+              <td><?php echo htmlspecialchars($i['numero_imovel']); ?></td>
               <td><?php echo htmlspecialchars($i['tipo_imovel']); ?></td>
               <td><?php echo htmlspecialchars($i['qtd_habitantes']); ?></td>
               <td><?php echo htmlspecialchars($i['qtd_caes']); ?></td>
               <td><?php echo htmlspecialchars($i['qtd_gatos']); ?></td>
               <td>
-                <form action="visita.php?id_imovel=<?php echo $i['id_imovel'] ?>" method="post">
-                  <button class="btn btn-trabalhar" onclick="trabalhar(<?php echo (int)$i['id_imovel']; ?>)">Trabalhar</button>
+                <form action="visita.php" method="get">
+                  <input type="hidden" name="id_imovel" value="<?php echo (int)$i['id_imovel']; ?>">
+                  <button class="btn btn-trabalhar" type="submit">Trabalhar</button>
                 </form>
               </td>
             </tr>
@@ -213,7 +219,7 @@ $conn->close();
     <form method="post" action="cadastro.php?id_quarteirao=<?php echo $id_quarteirao ?>">
       <button type="submit" class="btn btn-trabalhar">Cadastrar Imóvel</button>
     </form>
-    <button class="btn-voltar" onclick="window.history.back()">Voltar</button>
+    <button class="btn-voltar" onclick="window.location.href='rg.php?cod_area=<?php echo urlencode($_GET['cod_area'] ?? ''); ?>'">Voltar</button>
   </div>
 
   <script>

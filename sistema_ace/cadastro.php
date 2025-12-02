@@ -19,17 +19,13 @@ $quarteirao = $result_quarteiroes->fetch_assoc();
 // Se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-  // Verificar se os campos existem
-
-
-  $id_quarteirao = intval($_POST['id_quarteirao']);
-  $nome_rua = ($_POST['nome_rua']);
-  $numero_imovel = ($_POST['numero_imovel']);
-  $tipo_imovel = ($_POST['tipo_imovel']);
-
-  $qtd_habitantes = $_POST['qtd_habitantes'] !== '' ? intval($_POST['qtd_habitantes']) : null;
-  $qtd_caes       = $_POST['qtd_caes'] !== '' ? intval($_POST['qtd_caes']) : null;
-  $qtd_gatos      = $_POST['qtd_gatos'] !== '' ? intval($_POST['qtd_gatos']) : null;
+  // leia os dados somente aqui
+  $nome_rua        = $_POST['nome_rua']        ?? null;
+  $numero_imovel   = $_POST['numero_imovel']   ?? null;
+  $tipo_imovel     = $_POST['tipo_imovel']     ?? null;
+  $qtd_habitantes  = $_POST['qtd_habitantes']  ?? 0;
+  $qtd_caes        = $_POST['qtd_caes']        ?? 0;
+  $qtd_gatos       = $_POST['qtd_gatos']       ?? 0;
 
   $sql = "INSERT INTO imovel 
           (id_quarteirao, nome_rua, numero_imovel, tipo_imovel, qtd_habitantes, qtd_caes, qtd_gatos)
@@ -47,16 +43,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $qtd_gatos
   );
 
-  if ($stmt->execute()) {
-    $mensagem = "✅ Imóvel cadastrado com sucesso!";
-  } else {
-    $mensagem = "❌ Erro ao cadastrar: " . $stmt->error;
+  if ($nome_rua) {
+    if ($stmt->execute()) {
+      $mensagem = "✅ Imóvel cadastrado com sucesso!";
+    } else {
+      $mensagem = "❌ Erro ao cadastrar: " . $stmt->error;
+    }
+    header("Location: imoveis.php?id_quarteirao=$id_quarteirao&ok=1");
+    exit;
   }
-
   $stmt->close();
-
-  header("Location: imoveis.php?id_quarteirao=$id_quarteirao&ok=1");
-  exit;
 }
 
 
@@ -73,6 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link rel="stylesheet" href="style.css">
   <style>
     /* === Centralização e layout geral === */
+    /* Global box-sizing para melhor responsividade */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
     body {
       display: flex;
       justify-content: center;
@@ -84,8 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     .form-container {
       background: #fff;
-      padding: 40px 30px;
-      width: 380px;
+      padding: 30px 20px;
+      width: 100%;
+      max-width: 450px;
       border-radius: 16px;
       box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -196,7 +200,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" action="">
 
       <label for="id_quarteirao">Quarteirão</label>
-      <input type="hidden" name="id_quarteirao" value="<?php echo $quarteirao['id_quarteirao'] ?>">
+
       <input type="text" readonly id="id_quarteirao"
         value="<?php echo $quarteirao['nome_area'] . ' - ' . $quarteirao['numero_quarteirao']; ?>">
 

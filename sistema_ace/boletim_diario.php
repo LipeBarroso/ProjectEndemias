@@ -1,251 +1,250 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+require "init.php";
 
-require 'init.php';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = $_POST['data'];
-
-    $array_imoveis = [];
-    // dados da visita
-    $sql = "SELECT *
-            FROM visita
-            WHERE data = $data";
-
-    $resultado = $conn->query($sql)->fetch_assoc();
-    echo $resultado['id_imovel'];
-
-    // dados dos imoveis visistados
-    $i = 0;
-    while ($resultado['id_imovel']) {
-        $id = $resultado['id_imovel'];
-        $sql_imovel = "SELECT nome_rua, numero_imovel, tipo_imovel
-                        FROM imoveis
-                        WHERE id_imovel = $id";
-
-        $resultado2 = $conn->query($sql_imovel)->fetch_assoc();
-
-        $array_imoveis[$i] = [
-            'rua' => $resultado2['nome_rua'],
-            'numero' => $resultado2['numero_imovel'],
-            'tipo' => $resultado2['tipo_imovel']
-        ];
-        $i += 1;
-    }
-};
+// Captura data do filtro se enviada por POST
+$data_filtro = isset($_POST['data_filtro']) && !empty($_POST['data_filtro']) ? $_POST['data_filtro'] : '';
 
 
+$executarConsulta = !empty($data_filtro);
+if ($executarConsulta) {
+  $where_data = " AND DATE(v.data) = '" . $conn->real_escape_string($data_filtro) . "'";
+} else {
+  $where_data = ""; // vazio = não filtrar, mas não executar consulta
+}
+
+// Consulta agregada: para cada imóvel, conta depósitos por tipo (A1,A2,B,C,D1,D2) e soma o larvicida
+$sql_agg = "
+SELECT
+  rg.numero_quarteirao,
+  i.id_imovel,
+  i.nome_rua,
+  i.numero_imovel,
+  i.tipo_imovel,
+  COALESCE(SUM(CASE WHEN d.tipo = 'A1' THEN 1 ELSE 0 END),0) AS A1,
+  COALESCE(SUM(CASE WHEN d.tipo = 'A2' THEN 1 ELSE 0 END),0) AS A2,
+  COALESCE(SUM(CASE WHEN d.tipo = 'B'  THEN 1 ELSE 0 END),0) AS B,
+  COALESCE(SUM(CASE WHEN d.tipo = 'C'  THEN 1 ELSE 0 END),0) AS C,
+  COALESCE(SUM(CASE WHEN d.tipo = 'D1' THEN 1 ELSE 0 END),0) AS D1,
+  COALESCE(SUM(CASE WHEN d.tipo = 'D2' THEN 1 ELSE 0 END),0) AS D2,
+  COALESCE(SUM(d.qtd_larvicida),0) AS qtd_larvicida
+FROM imovel i
+JOIN registro_geografico rg ON i.id_quarteirao = rg.id_quarteirao
+LEFT JOIN visita v ON v.id_imovel = i.id_imovel
+LEFT JOIN deposito d ON d.id_visita = v.id_visita
+WHERE 1=1 $where_data
+GROUP BY i.id_imovel
+ORDER BY rg.numero_quarteirao ASC, i.nome_rua ASC
+";
+
+$rows = [];
+
+if ($executarConsulta) {
+  $res = $conn->query($sql_agg);
+  if ($res && $res->num_rows > 0) {
+    while ($r = $res->fetch_assoc()) $rows[] = $r;
+  }
+}
+
+
+$conn->close();
 ?>
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boletim Diário</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #ffffff;
-            margin: 0;
-            padding: 40px 0;
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Boletim Diário - Sistema ACE</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
 
-        .container {
-            background: #fff;
-            width: 95%;
-            max-width: 950px;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: #f7f9fc;
+    }
 
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 6px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            background: #f2f2f2;
-            font-size: 14px;
-            outline: none;
-            transition: border 0.2s;
-        }
+    .wrap {
+      max-width: 1000px;
+      margin: 28px auto;
+      padding: 18px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
 
-        input:focus {
-            border-color: #009688;
-            background: #fff;
-        }
+    h2 {
+      color: #006666;
+      margin: 0 0 12px 0;
+    }
 
-        .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0px 12px 35px rgba(0, 0, 0, 0.25);
-        }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
 
-        h2 {
-            color: #006666;
-            font-size: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+    th,
+    td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+      text-align: left;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
+    th {
+      background: #f2f7f7;
+      color: #006666;
+      font-weight: 700;
+    }
 
-        th,
-        td {
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-            padding: 10px;
-            font-size: 14px;
-        }
+    .empty {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
 
-        th {
-            color: #006666;
-            font-weight: bold;
-            background: #f2f2f2;
-        }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
 
-        tr:hover {
-            background: #f9f9f9;
-        }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
 
-        .btn {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-        }
+    .btn-trabalhar {
+      background: #009688;
+      color: white;
+    }
 
-        .btn:hover {
-            transform: translateY(-2px);
-        }
+    .btn-trabalhar:hover {
+      background: #00796b;
+    }
 
-        .btn-trabalhar {
-            background: #009688;
-            color: white;
-        }
+    .btn-voltar {
+      margin-top: 20px;
+      background: #1976d2;
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.2s;
+      border: none;
+    }
 
-        .btn-trabalhar:hover {
-            background: #00796b;
-        }
+    .btn-voltar:hover {
+      background: #1565c0;
+      transform: translateY(-2px);
+    }
 
-        .btn-voltar {
-            margin-top: 20px;
-            background: #1976d2;
-            color: white;
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.2s;
-        }
+    @media (max-width:800px) {
 
-        .btn-voltar:hover {
-            background: #1565c0;
-            transform: translateY(-2px);
-        }
-
-        @media (max-width: 700px) {
-            .container {
-                width: 90%;
-                padding: 20px;
-            }
-
-            th,
-            td {
-                font-size: 13px;
-                padding: 8px;
-            }
-
-            .btn {
-                font-size: 13px;
-                padding: 8px;
-            }
-        }
-    </style>
+      th:nth-child(5),
+      td:nth-child(5),
+      th:nth-child(6),
+      td:nth-child(6) {
+        display: none;
+      }
+    }
+  </style>
 </head>
 
 <body>
-
-    <div class="container">
-        <form action="" method="post">
-            <input type="date" name="data" required>
-            <button type="submit" class="btn btn-trabalhar">Gerar Relatório</button>
-        </form>
+  <div class="wrap">
+    <div style="font-size:12px; color:#666; margin-bottom:16px;">
+      <a href="index.php" style="color:#1976d2; text-decoration:none;">Home</a> &gt; <span style="color:#333; font-weight:600;">Boletim Diário</span>
     </div>
-    <!--
-    <div class="container">
-        <table>
-            <thead>
-                <tr>
-                    <th>N° Quarteirão</th>
-                    <th>Nome da Rua</th>
-                    <th>Número do Imóvel</th>
-                    <th>Tipo do Imóvel</th>
-                    <th>Qtd. Habitantes</th>
-                    <th>Qtd. Cães</th>
-                    <th>Qtd. Gatos</th>
-                    <th>Ação</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($imoveis)): ?>
-                    <tr>
-                        <td colspan="8" style="text-align:center;">Nenhum imóvel cadastrado.</td>
-                    </tr>
-                <?php else: ?>
-                    <?php foreach ($imoveis as $i): ?>
-                        <tr>
-                            <td><?php echo $numero_quarteirao; ?></td>
-                            <td><?php echo htmlspecialchars($i['nome_rua']); ?></td>
-                            <td><?php echo htmlspecialchars($i['numer_imovel']); ?></td>
-                            <td><?php echo htmlspecialchars($i['tipo_imovel']); ?></td>
-                            <td><?php echo htmlspecialchars($i['qtd_habitantes']); ?></td>
-                            <td><?php echo htmlspecialchars($i['qtd_caes']); ?></td>
-                            <td><?php echo htmlspecialchars($i['qtd_gatos']); ?></td>
-                            <td>
-                                <form action="visita.php?id_imovel=<?php echo $i['id_imovel'] ?>" method="post">
-                                    <button class="btn btn-trabalhar" onclick="trabalhar(<?php echo (int)$i['id_imovel']; ?>)">Trabalhar</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-        <form method="post" action="cadastro.php?id_quarteirao=<?php echo $id_quarteirao ?>">
-            <button type="submit" class="btn btn-trabalhar">Cadastrar Imóvel</button>
-        </form>
-        <button class="btn-voltar" onclick="window.history.back()">Voltar</button>
-    </div>
+    <h2>Boletim Diário</h2>
+    <p style="color:#444; margin:6px 0 12px 0;">Filtro por data e lista de imóveis com contagem de depósitos por tipo.</p>
 
-    <script>
-        function trabalhar(id) {
-            alert("🔍 Acessando o imóvel ID " + id);
-            // Aqui pode redirecionar: window.location.href = 'detalhes_imovel.php?id=' + id;
-        }
-    </script>
--->
+    <!-- Filtro por Data -->
+    <form method="post" style="display:flex; gap:8px; margin-bottom:16px; align-items:flex-end; flex-wrap:wrap;">
+      <div style="flex:1; min-width:180px;">
+        <label for="data_filtro" style="display:block; font-weight:600; color:#006666; margin-bottom:4px;">Filtrar por Data:</label>
+        <input type="date" id="data_filtro" name="data_filtro" value="" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;">
+      </div>
+      <button type="submit" style="padding:8px 16px; background:#009688; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Filtrar</button>
+      <?php if (!empty($data_filtro)): ?>
+        <a href="boletim_diario.php" style="padding:8px 16px; background:#1976d2; color:#fff; text-decoration:none; border-radius:6px; font-weight:600;">Limpar</a>
+      <?php endif; ?>
+    </form>
+
+    <?php if (session_status() === PHP_SESSION_NONE) {
+      session_start();
+    } ?>
+    <?php if (!empty($_SESSION['flash'] ?? null)): ?>
+      <div style="background:#e6ffed;color:#005b2e;padding:10px;border-radius:6px;margin-bottom:12px;">
+        <?php echo htmlspecialchars($_SESSION['flash']);
+        unset($_SESSION['flash']); ?>
+      </div>
+    <?php endif; ?>
+
+    <table>
+      <thead>
+        <tr>
+          <th>N° Quarteirão</th>
+          <th>Nome da Rua</th>
+          <th>Número do Imóvel</th>
+          <th>Tipo do Imóvel</th>
+          <th>A1</th>
+          <th>A2</th>
+          <th>B</th>
+          <th>C</th>
+          <th>D1</th>
+          <th>D2</th>
+          <th>Larvicida</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php if (empty($rows)): ?>
+          <tr>
+            <td class="empty" colspan="11">Nenhum imóvel cadastrado.</td>
+          </tr>
+        <?php else: ?>
+          <?php foreach ($rows as $i): ?>
+            <tr>
+              <td><?php echo htmlspecialchars($i['numero_quarteirao']); ?></td>
+              <td><?php echo htmlspecialchars($i['nome_rua']); ?></td>
+              <td><?php echo htmlspecialchars($i['numero_imovel']); ?></td>
+              <td><?php echo htmlspecialchars($i['tipo_imovel']); ?></td>
+              <td><?php echo (int)$i['A1']; ?></td>
+              <td><?php echo (int)$i['A2']; ?></td>
+              <td><?php echo (int)$i['B']; ?></td>
+              <td><?php echo (int)$i['C']; ?></td>
+              <td><?php echo (int)$i['D1']; ?></td>
+              <td><?php echo (int)$i['D2']; ?></td>
+              <td><?php echo htmlspecialchars($i['qtd_larvicida']); ?></td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </tbody>
+    </table>
+
+    <p style="margin-top:14px;"><button class="btn-voltar" onclick="window.location.href='index.php';">Voltar ao Painel</button></p>
+  </div>
 </body>
 
 </html>
+<?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+?>

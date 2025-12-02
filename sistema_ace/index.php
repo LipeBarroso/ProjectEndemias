@@ -26,6 +26,8 @@ $conn->close();
   <title>Sistema ACE - Endemias</title>
   <link rel="stylesheet" href="style.css">
   <style>
+    /* Resposta: garante box-sizing consistente e melhora comportamento em telas pequenas */
+    *, *::before, *::after { box-sizing: border-box; }
     /* === Estilo principal === */
     body {
       display: flex;
@@ -151,21 +153,18 @@ $conn->close();
     /* === Responsividade === */
     @media (max-width: 600px) {
       .container {
-        width: 90%;
-        padding: 30px 20px;
+        width: 96%;
+        padding: 24px 16px;
       }
 
-      h1 {
-        font-size: 24px;
-      }
+      h1 { font-size: 22px; }
 
-      .btn {
-        font-size: 14px;
-        padding: 14px;
-      }
+      .btn { font-size: 14px; padding: 12px; }
 
+      /* permitir que os cards se ajustem melhor em telas pequenas */
       .stats-container {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
       }
     }
   </style>
@@ -194,8 +193,7 @@ $conn->close();
 
     <div class="menu-container">
       <a href="area.php" class="btn btn-primary">📍 Gerenciar Áreas</a>
-      <a href="cadastro.php" class="btn btn-secondary">📝 Gerar Boletim Diário</a>
-      <a href="visita.php" class="btn btn-info">🏠 Registrar Visita</a>
+      <a href="boletim_diario.php" class="btn btn-info">📋 Boletim Diário</a>
     </div>
   </div>
 
