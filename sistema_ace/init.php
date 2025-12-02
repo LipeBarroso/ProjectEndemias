@@ -5,15 +5,16 @@
   $db = "sistema_ace";
   $port = 3306;
 
-  $conn = new mysqli($host,$usuario,$senha,$db,$port);
+  $conn = new mysqli($host, $usuario, $senha, $db, $port);
 
-  if($conn){
-    echo '<script>console.log("Conectado")</script>';
-  }else{
-    echo '<script>console.log("Não Conectado")</script>';
+  if ($conn->connect_error) {
+    error_log("MySQL connection failed: " . $conn->connect_error);
+    // Do not echo or print here — keep output-free to avoid header/session issues.
   }
 
-  session_start();
+  if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+  }
 
 ?>
 

@@ -8,7 +8,8 @@ error_reporting(E_ALL);
 $id_visita = isset($_GET['id_visita']) ? intval($_GET['id_visita']) : 0;
 
 if ($id_visita < 0) {
-  die("ID da visita inválido.");
+
+die("id_visita inválido");
 }
 
 // ===========================
@@ -64,7 +65,6 @@ $sql_atualiza_visita = "
 $conn->query($sql_atualiza_visita);
 unset($_SESSION['visita_id']);
 
-
 // ===========================
 // INSERIR MÚLTIPLOS DEPÓSITOS
 // ===========================
@@ -113,7 +113,11 @@ $id_quarteirao = $_POST['id_quarteirao'];
 // Fecha conexão DEPOIS do header
 $conn->close();
 
-echo "<script>alert('Registro salvo com sucesso!');</script>";
+// Set a flash message in session instead of echoing JS (prevents output-before-headers)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$_SESSION['flash'] = 'Registro salvo com sucesso!';
 
 header("Location: imoveis.php?id_quarteirao=$id_quarteirao");
 exit();
