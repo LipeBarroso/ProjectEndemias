@@ -73,6 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link rel="stylesheet" href="style.css">
   <style>
     /* === Centralização e layout geral === */
+    /* Global box-sizing para melhor responsividade */
+    *, *::before, *::after { box-sizing: border-box; }
     body {
       display: flex;
       justify-content: center;
@@ -84,8 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     .form-container {
       background: #fff;
-      padding: 40px 30px;
-      width: 380px;
+      padding: 30px 20px;
+      width: 100%;
+      max-width: 450px;
       border-radius: 16px;
       box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
       transition: transform 0.2s ease, box-shadow 0.2s ease;

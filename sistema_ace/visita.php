@@ -80,6 +80,8 @@ $conn->close();
   <title>Visita Domiciliar</title>
   <style>
     /* === Centralização e layout geral === */
+      /* Global box-sizing para layout previsível em dispositivos móveis */
+      *, *::before, *::after { box-sizing: border-box; }
     body {
       display: flex;
       justify-content: center;
@@ -99,6 +101,9 @@ $conn->close();
       border-radius: 16px;
       box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      padding: 30px 20px;
+      width: 100%;
+      max-width: 450px;
     }
 
     .form-container:hover {
@@ -180,6 +185,35 @@ $conn->close();
 
     #depositos {
       display: none;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border: 1px solid #ddd;
+        width: 100%;
+    }
+
+    .deposito-item {
+      background: white;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border-left: 4px solid #009688;
+    }
+
+    .btn-adicionar {
+      background: #388e3c !important;
+    }
+
+    .btn-adicionar:hover {
+      background: #2e7d32 !important;
+    }
+
+    .btn-remover {
+      background: #d32f2f !important;
+    }
+
+    .btn-remover:hover {
+      background: #c62828 !important;
     }
 
     /* === Responsividade === */
@@ -216,8 +250,8 @@ $conn->close();
       }
 
       .form-container {
-        width: 100%;
-        padding: 25px 18px;
+          width: 96%;
+          padding: 20px 14px;
         border-radius: 12px;
         box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
       }
@@ -309,12 +343,18 @@ $conn->close();
       <button type="button" onclick="mostrar()" class="btn btn-cancelar">Depósitos</button>
 
       <div id="depositos">
-        <label for="a1">A1</label>
-        <input type="number" id="a1" name="a1" placeholder="Digite A1">
-        <label for="focos_a1"></label>
-        <input type="number" id="focos_a1" name="focos_a1" placeholder="Quantos possuem foco">
-        <label for="larvicida">Larvicida</label>
-        <input type="number" id="larvicida" name="larvicida" placeholder="Qtd Larvicida" min="0" step="0.5">
+        <div id="depositos-container">
+          <div class="deposito-item">
+            <label for="a1_1">A1</label>
+            <input type="number" class="a1" name="a1[]" placeholder="Digite A1">
+            <label for="focos_a1_1">Focos A1</label>
+            <input type="number" class="focos_a1" name="focos_a1[]" placeholder="Quantos possuem foco">
+            <label for="larvicida_1">Larvicida</label>
+            <input type="number" class="larvicida" name="larvicida[]" placeholder="Qtd Larvicida" min="0" step="0.5">
+            <button type="button" onclick="removerDeposito(this)" class="btn btn-remover" style="background: #d32f2f; font-size: 14px; padding: 8px; margin-top: 10px;">Remover</button>
+          </div>
+        </div>
+        <button type="button" onclick="adicionarDeposito()" class="btn btn-adicionar" style="background: #388e3c; font-size: 14px; margin-top: 10px;">+ Adicionar Depósito</button>
       </div>
 
       <button type="submit" class="btn btn-salvar">Salvar</button>
@@ -335,7 +375,30 @@ $conn->close();
       } else {
         div.style.display = "none";
       }
+    }
 
+    function adicionarDeposito() {
+      const container = document.getElementById("depositos-container");
+      const items = container.querySelectorAll(".deposito-item").length;
+      const novoId = items + 1;
+
+      const novoItem = document.createElement("div");
+      novoItem.className = "deposito-item";
+      novoItem.innerHTML = `
+        <label for="a1_${novoId}">A1</label>
+        <input type="number" class="a1" name="a1[]" placeholder="Digite A1">
+        <label for="focos_a1_${novoId}">Focos A1</label>
+        <input type="number" class="focos_a1" name="focos_a1[]" placeholder="Quantos possuem foco">
+        <label for="larvicida_${novoId}">Larvicida</label>
+        <input type="number" class="larvicida" name="larvicida[]" placeholder="Qtd Larvicida" min="0" step="0.5">
+        <button type="button" onclick="removerDeposito(this)" class="btn btn-remover" style="background: #d32f2f; font-size: 14px; padding: 8px; margin-top: 10px;">Remover</button>
+      `;
+
+      container.appendChild(novoItem);
+    }
+
+    function removerDeposito(btn) {
+      btn.parentElement.remove();
     }
   </script>
 

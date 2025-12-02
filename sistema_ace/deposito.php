@@ -64,6 +64,47 @@ $sql_atualiza_visita = "
 $conn->query($sql_atualiza_visita);
 
 // ===========================
+// INSERIR MÚLTIPLOS DEPÓSITOS
+// ===========================
+
+$a1_array = isset($_POST['a1']) ? $_POST['a1'] : [];
+$focos_a1_array = isset($_POST['focos_a1']) ? $_POST['focos_a1'] : [];
+$larvicida_array = isset($_POST['larvicida']) ? $_POST['larvicida'] : [];
+
+// Preparar statement para inserção de depósitos
+$sql_deposito = "INSERT INTO deposito (id_visita, tipo, foco, qtd_larvicida) VALUES (?, ?, ?, ?)";
+$stmt = $conn->prepare($sql_deposito);
+
+if (!$stmt) {
+    die("Erro ao preparar a query: " . $conn->error);
+}
+
+// Inserir cada depósito
+for ($i = 0; $i < count($a1_array); $i++) {
+    $a1 = isset($a1_array[$i]) ? intval($a1_array[$i]) : 0;
+    $focos = isset($focos_a1_array[$i]) ? intval($focos_a1_array[$i]) : 0;
+    $larvicida = isset($larvicida_array[$i]) ? floatval($larvicida_array[$i]) : 0;
+
+    // Se todos os campos estão vazios, pula este item
+    if ($a1 == 0 && $focos == 0 && $larvicida == 0) {
+        continue;
+    }
+
+    // A1 é o tipo (A1, A2, etc)
+    // focos define se tem foco (true/false)
+    $tipo = "A" . $a1;
+    $foco = $focos > 0 ? 1 : 0;
+
+    $stmt->bind_param("isid", $id_visita, $tipo, $foco, $larvicida);
+    
+    if (!$stmt->execute()) {
+        echo "Erro ao inserir depósito " . ($i + 1) . ": " . $stmt->error . "<br>";
+    }
+}
+
+$stmt->close();
+
+// ===========================
 
 $id_quarteirao = $_POST['id_quarteirao'];
 
@@ -74,3 +115,4 @@ echo "<script>alert('Registro salvo com sucesso!');</script>";
 
 header("Location: imoveis.php?id_quarteirao=$id_quarteirao");
 exit();
+?>

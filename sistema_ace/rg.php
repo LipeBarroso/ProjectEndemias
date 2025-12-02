@@ -47,6 +47,8 @@ $conn->close();
 <title>Registro Geográfico</title>
 <link rel="stylesheet" href="style.css">
 <style>
+  /* Global box-sizing para melhor controle de largura */
+  *, *::before, *::after { box-sizing: border-box; }
   /* Centralização total */
   body {
     display: flex;
@@ -146,8 +148,8 @@ $conn->close();
 
   @media (max-width: 700px) {
     .container {
-      width: 90%;
-      padding: 20px;
+      width: 96%;
+      padding: 14px;
     }
     th, td {
       font-size: 13px;

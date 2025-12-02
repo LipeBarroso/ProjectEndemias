@@ -28,6 +28,8 @@ $conn->close();
   <title>Áreas</title>
   <link rel="stylesheet" href="style.css">
   <style>
+    /* melhora responsividade: box-sizing para todos os elementos */
+    *, *::before, *::after { box-sizing: border-box; }
     /* === Centralização geral === */
     body {
       display: flex;
@@ -143,8 +145,8 @@ $conn->close();
 
     @media (max-width: 700px) {
       .container {
-        width: 90%;
-        padding: 20px;
+        width: 96%;
+        padding: 16px;
       }
 
       th,
