@@ -197,7 +197,7 @@ $conn->close();
             <tr>
               <td><?php echo $numero_quarteirao; ?></td>
               <td><?php echo htmlspecialchars($i['nome_rua']); ?></td>
-              <td><?php echo htmlspecialchars($i['numer_imovel']); ?></td>
+              <td><?php echo htmlspecialchars($i['numero_imovel']); ?></td>
               <td><?php echo htmlspecialchars($i['tipo_imovel']); ?></td>
               <td><?php echo htmlspecialchars($i['qtd_habitantes']); ?></td>
               <td><?php echo htmlspecialchars($i['qtd_caes']); ?></td>
