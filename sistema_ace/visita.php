@@ -9,6 +9,10 @@ require "init.php"; // conexão com o banco
 // Verifica se veio ID pela URL
 $id_imovel = isset($_GET['id_imovel']) ? (int) $_GET['id_imovel'] : 0;
 
+if ($id_imovel <= 0) {
+  die("Erro: ID do imóvel inválido ou não recebido. Volte e tente novamente.");
+}
+
 
 // Consulta dados do imóvel
 $sql_1 = "SELECT * 
@@ -34,7 +38,7 @@ $sql_registro_geografico = "SELECT
 $dados_quarteirao = $conn->query($sql_registro_geografico);
 $dados_quarteirao = $dados_quarteirao->fetch_assoc();
 
-
+unset($_SESSION['visita_id']);
 // verificando se existe visita em andamento
 if (!isset($_SESSION['visita_id'])) {
 
@@ -54,12 +58,25 @@ if (!isset($_SESSION['visita_id'])) {
     $_SESSION['visita_id'] = $linha['id_visita'];
   } else { // A visita não existe então vamos criala
 
-    $sql_cria_visita = "INSERT 
-                          INTO visita(id_imovel, estado) 
-                          values('$id_imovel', 1)";
-    $conn->query($sql_cria_visita);
-
-    $_SESSION['visita_id'] = $conn->insert_id;
+    $sql_cria_visita = "INSERT INTO visita(id_imovel, tipo, estado) VALUES (?, 'Normal', 1)";
+    $stmt = $conn->prepare($sql_cria_visita);
+    
+    if ($stmt) {
+      $stmt->bind_param("i", $id_imovel);
+      
+      if ($stmt->execute()) {
+        $_SESSION['visita_id'] = $stmt->insert_id;
+        $stmt->close();
+        
+        if (!$_SESSION['visita_id'] || $_SESSION['visita_id'] == 0) {
+          die("Erro ao criar visita: ID inválido");
+        }
+      } else {
+        die("Erro ao executar query: " . $stmt->error);
+      }
+    } else {
+      die("Erro ao preparar query: " . $conn->error);
+    }
   }
 }
 
@@ -294,6 +311,9 @@ $conn->close();
 <body>
 
   <div class="form-container">
+    <div style="font-size:12px; color:#666; margin-bottom:12px;">
+      <a href="index.php" style="color:#1976d2; text-decoration:none;">Home</a> &gt; <a href="area.php" style="color:#1976d2; text-decoration:none;">Áreas</a> &gt; <a href="rg.php?cod_area=<?php echo urlencode($dados_quarteirao['cod_area'] ?? ''); ?>" style="color:#1976d2; text-decoration:none;">Quarteirões</a> &gt; <a href="imoveis.php?id_quarteirao=<?php echo urlencode($id_quarteirao ?? ''); ?>" style="color:#1976d2; text-decoration:none;">Imóveis</a> &gt; <span style="color:#333; font-weight:600;">Visita</span>
+    </div>
     <h2><?php echo $dados_quarteirao['nome_area'] . " - " . $dados_quarteirao['numero_quarteirao'] ?></h2>
 
     <form method="post" action="deposito.php?id_visita=<?php echo $id_visita ?>">
@@ -364,7 +384,7 @@ $conn->close();
 
   <script>
     function voltar() {
-      window.history.back();
+      window.location.href = 'imoveis.php?id_quarteirao=<?php echo urlencode($id_quarteirao ?? ''); ?>';
     }
 
     function mostrar() {

@@ -161,6 +161,9 @@ $conn->close();
 <body>
 
   <div class="container">
+    <div style="font-size:12px; color:#666; margin-bottom:16px;">
+      <a href="index.php" style="color:#1976d2; text-decoration:none;">Home</a> &gt; <span style="color:#333; font-weight:600;">Áreas</span>
+    </div>
     <h2>Áreas Cadastradas</h2>
 
     <table>

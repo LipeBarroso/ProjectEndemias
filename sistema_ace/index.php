@@ -193,6 +193,7 @@ $conn->close();
 
     <div class="menu-container">
       <a href="area.php" class="btn btn-primary">📍 Gerenciar Áreas</a>
+      <a href="boletim_diario.php" class="btn btn-info">📋 Boletim Diário</a>
     </div>
   </div>
 
