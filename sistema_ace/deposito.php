@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 
 $id_visita = isset($_GET['id_visita']) ? intval($_GET['id_visita']) : 0;
 
-if ($id_visita <= 0) {
+if ($id_visita < 0) {
     die("ID da visita inválido.");
 }
 
