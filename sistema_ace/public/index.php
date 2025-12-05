@@ -1,4 +1,9 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 /**
  * Router para o Sistema ACE em MVC
  * Processa as requisições e roteia para os controllers apropriados
@@ -7,7 +12,8 @@
 session_start();
 
 // Incluir a classe de banco de dados
-require_once __DIR__ . '/config/database.php';
+require_once('../config/database.php');
+
 
 // Criar conexão
 $db = new Database();
@@ -20,14 +26,14 @@ $action = $_GET['action'] ?? 'dashboard';
 switch ($action) {
     // Dashboard
     case 'dashboard':
-        require_once __DIR__ . '/app/Controllers/DashboardController.php';
+        require_once('../Controllers/DashboardController.php');
         $controller = new DashboardController($conn);
         $controller->index();
         break;
 
     // Área
     case 'area-index':
-        require_once __DIR__ . '/app/Controllers/AreaController.php';
+        require_once('../Controllers/AreaController.php');
         $controller = new AreaController($conn);
         $controller->index();
         break;
@@ -35,7 +41,7 @@ switch ($action) {
     // Quarteirão
     case 'quarteirao-list':
         $cod_area = $_GET['cod_area'] ?? null;
-        require_once __DIR__ . '/app/Controllers/QuarteiraoController.php';
+        require_once('../Controllers/QuarteiraoController.php');
         $controller = new QuarteiraoController($conn);
         $controller->listByArea($cod_area);
         break;
@@ -43,7 +49,7 @@ switch ($action) {
     // Imóvel - Listar
     case 'imovel-list':
         $id_quarteirao = (int)($_GET['id_quarteirao'] ?? 0);
-        require_once __DIR__ . '/app/Controllers/ImovelController.php';
+        require_once('../Controllers/ImovelController.php');
         $controller = new ImovelController($conn);
         $controller->listByQuarteirao($id_quarteirao);
         break;
@@ -51,7 +57,7 @@ switch ($action) {
     // Imóvel - Criar (formulário)
     case 'imovel-create':
         $id_quarteirao = (int)($_GET['id_quarteirao'] ?? 0);
-        require_once __DIR__ . '/app/Controllers/ImovelController.php';
+        require_once('../Controllers/ImovelController.php');
         $controller = new ImovelController($conn);
         $controller->create($id_quarteirao);
         break;
@@ -59,7 +65,7 @@ switch ($action) {
     // Imóvel - Salvar
     case 'imovel-store':
         $id_quarteirao = (int)($_GET['id_quarteirao'] ?? 0);
-        require_once __DIR__ . '/app/Controllers/ImovelController.php';
+        require_once('../Controllers/ImovelController.php');
         $controller = new ImovelController($conn);
         $controller->store($id_quarteirao);
         break;
@@ -67,7 +73,7 @@ switch ($action) {
     // Visita - Exibir
     case 'visita-show':
         $id_imovel = (int)($_GET['id_imovel'] ?? 0);
-        require_once __DIR__ . '/app/Controllers/VisitaController.php';
+        require_once('../Controllers/VisitaController.php');
         $controller = new VisitaController($conn);
         $controller->show($id_imovel);
         break;
@@ -75,7 +81,7 @@ switch ($action) {
     // Visita - Adicionar depósito
     case 'visita-add-deposito':
         $id_visita = (int)($_POST['id_visita'] ?? 0);
-        require_once __DIR__ . '/app/Controllers/VisitaController.php';
+        require_once('../Controllers/VisitaController.php');
         $controller = new VisitaController($conn);
         $controller->addDeposito($id_visita);
         break;
@@ -83,7 +89,7 @@ switch ($action) {
     // Visita - Remover depósito
     case 'visita-remove-deposito':
         $id_deposito = (int)($_GET['id_deposito'] ?? 0);
-        require_once __DIR__ . '/app/Controllers/VisitaController.php';
+        require_once('../Controllers/VisitaController.php');
         $controller = new VisitaController($conn);
         $controller->removeDeposito($id_deposito);
         break;
@@ -91,7 +97,7 @@ switch ($action) {
     // Visita - Finalizar
     case 'visita-finish':
         $id_visita = (int)($_GET['id_visita'] ?? 0);
-        require_once __DIR__ . '/app/Controllers/VisitaController.php';
+        require_once('../Controllers/VisitaController.php');
         $controller = new VisitaController($conn);
         $controller->finish($id_visita);
         break;
@@ -104,4 +110,3 @@ switch ($action) {
 
 // Fechar conexão
 $db->closeConnection();
-?>
