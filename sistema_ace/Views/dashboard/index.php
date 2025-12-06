@@ -120,7 +120,7 @@
             </div>
         </div>
 
-        <a href="../../public/index.php?action=area-index" class="btn">Iniciar</a>
+        <a href="../public/index.php?action=area-index" class="btn">Iniciar</a>
     </div>
 </body>
 

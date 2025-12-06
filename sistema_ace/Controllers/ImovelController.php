@@ -1,14 +1,19 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 /**
  * Controller: ImovelController
  * Gerencia as ações relacionadas a imóveis
  */
 
-class ImovelController {
+class ImovelController
+{
     private $imovelModel;
     private $quarteiraoModel;
 
-    public function __construct($connection) {
+    public function __construct($connection)
+    {
         require_once __DIR__ . '/../Models/Imovel.php';
         require_once __DIR__ . '/../Models/Quarteirao.php';
         $this->imovelModel = new Imovel($connection);
@@ -19,19 +24,21 @@ class ImovelController {
     /**
      * Ação: Listar imóveis por quarteirão
      */
-    public function listByQuarteirao($id_quarteirao) {
+    public function listByQuarteirao($id_quarteirao)
+    {
         $imoveis = $this->imovelModel->getByQuarteirao($id_quarteirao);
         $numero_quarteirao = $this->quarteiraoModel->getNumero($id_quarteirao);
-        
+
         require_once __DIR__ . '/../Views/imovel/index.php';
     }
 
     /**
      * Ação: Formulário de cadastro
      */
-    public function create($id_quarteirao) {
+    public function create($id_quarteirao)
+    {
         $quarteirao = $this->quarteiraoModel->getById($id_quarteirao);
-        
+
         if (!$quarteirao) {
             die("Quarteirão não encontrado!");
         }
@@ -42,7 +49,8 @@ class ImovelController {
     /**
      * Ação: Salvar novo imóvel
      */
-    public function store($id_quarteirao) {
+    public function store($id_quarteirao)
+    {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: /sistema_ace/?action=imovel-create&id_quarteirao=$id_quarteirao");
             exit;
@@ -78,4 +86,3 @@ class ImovelController {
         }
     }
 }
-?>
